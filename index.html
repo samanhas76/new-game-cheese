@@ -3,182 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Game</title>
+    <title>Two-Player Chess Game</title>
     <style>
+        /* Basic styles for the chessboard and pieces */
         body {
-            font-family: Arial, sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            padding: 20px;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
         }
-        h1 {
-            color: white;
-            margin-bottom: 20px;
-        }
-        .game-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-        }
-        #board {
+        #chessboard {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 0;
+            grid-template-rows: repeat(8, 1fr);
             width: 400px;
             height: 400px;
-            margin-bottom: 20px;
-            background-color: #8B4513;
-            border: 3px solid #333;
         }
         .square {
             width: 50px;
             height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 35px;
-            cursor: pointer;
-            transition: background-color 0.2s;
         }
-        .square.light {
-            background-color: #F0D9B5;
+        .black {
+            background-color: #769656;
         }
-        .square.dark {
-            background-color: #B58863;
+        .white {
+            background-color: #eeeed2;
         }
-        .square:hover {
-            opacity: 0.8;
-        }
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            background-color: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #764ba2;
-        }
-        .status {
-            margin-top: 20px;
+        .piece {
+            font-size: 2em;
             text-align: center;
-            color: #333;
-            font-weight: bold;
+            line-height: 50px;
         }
     </style>
 </head>
 <body>
-    <h1>♟️ Chess Game ♟️</h1>
-    <div class="game-container">
-        <div id="board"></div>
-        <div class="controls">
-            <button id="start">Start Game</button>
-            <button id="reset">Reset Game</button>
-        </div>
-        <div class="status" id="status">Click "Start Game" to begin!</div>
-    </div>
-
+    <div id="chessboard"></div>
     <script>
-        // Chess pieces representation
+        const board = document.getElementById('chessboard');
         const pieces = {
-            'R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟',
-            'r': '♖', 'n': '♘', 'b': '♗', 'q': '♕', 'k': '♔', 'p': '♙'
+            r: '♖', n: '♘', b: '♗', q: '♕', k: '♔', p: '♙',
+            R: '♜', N: '♞', B: '♝', Q: '♛', K: '♚', P: '♟'
         };
-
-        // Initial board setup
         const initialBoard = [
-            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'],
-            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null],
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
             ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
-            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r']
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
         ];
 
-        let board = JSON.parse(JSON.stringify(initialBoard));
-        let gameStarted = false;
-        let selectedSquare = null;
-
-        const boardElement = document.getElementById('board');
-        const statusElement = document.getElementById('status');
-        const startButton = document.getElementById('start');
-        const resetButton = document.getElementById('reset');
-
-        function renderBoard() {
-            boardElement.innerHTML = '';
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
+        function createBoard() {
+            board.innerHTML = '';
+            initialBoard.forEach((row, rowIndex) => {
+                row.forEach((piece, colIndex) => {
                     const square = document.createElement('div');
-                    square.classList.add('square');
-                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
-                    
-                    const piece = board[row][col];
+                    square.classList.add('square', (rowIndex + colIndex) % 2 === 0 ? 'white' : 'black');
                     if (piece) {
-                        square.textContent = pieces[piece];
+                        const pieceElement = document.createElement('div');
+                        pieceElement.classList.add('piece');
+                        pieceElement.innerHTML = pieces[piece];
+                        square.appendChild(pieceElement);
                     }
-                    
-                    square.addEventListener('click', () => {
-                        if (gameStarted) {
-                            handleSquareClick(row, col);
-                        }
-                    });
-                    
-                    boardElement.appendChild(square);
-                }
-            }
+                    board.appendChild(square);
+                });
+            });
         }
 
-        function handleSquareClick(row, col) {
-            if (selectedSquare === null) {
-                if (board[row][col] !== null) {
-                    selectedSquare = { row, col };
-                    statusElement.textContent = `Selected piece at (${row}, ${col})`;
-                }
-            } else {
-                const fromRow = selectedSquare.row;
-                const fromCol = selectedSquare.col;
-                
-                board[row][col] = board[fromRow][fromCol];
-                board[fromRow][fromCol] = null;
-                
-                statusElement.textContent = `Moved piece from (${fromRow}, ${fromCol}) to (${row}, ${col})`;
-                selectedSquare = null;
-                renderBoard();
-            }
-        }
-
-        startButton.addEventListener('click', () => {
-            gameStarted = true;
-            board = JSON.parse(JSON.stringify(initialBoard));
-            renderBoard();
-            statusElement.textContent = 'Game started! Click to select and move pieces.';
-        });
-
-        resetButton.addEventListener('click', () => {
-            gameStarted = false;
-            selectedSquare = null;
-            board = JSON.parse(JSON.stringify(initialBoard));
-            renderBoard();
-            statusElement.textContent = 'Game reset. Click "Start Game" to begin!';
-        });
-
-        renderBoard();
+        createBoard();
+        // Further functions to implement movement, rules, turn management, etc. would go here.
     </script>
 </body>
 </html>
