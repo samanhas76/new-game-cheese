@@ -1,0 +1,2 @@
+Name,Job Title,Job Description,Start Hour,End Hour,Duration (Hours)
+,,,09:00,17:00,=IF(OR(D2="",E2=""),"",(E2-D2)*24)
